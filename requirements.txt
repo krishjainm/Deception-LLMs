@@ -1,0 +1,29 @@
+# Core dependencies for Deception Circuits Research Infrastructure
+torch>=1.9.0
+numpy>=1.21.0
+pandas>=1.3.0
+scikit-learn>=1.0.0
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# Data processing
+scipy>=1.7.0
+
+# Optional: For advanced visualization
+# jupyter>=1.0.0
+# ipywidgets>=7.6.0
+
+# Optional: For model loading (if using HuggingFace models)
+# transformers>=4.20.0
+# datasets>=2.0.0
+
+# Development dependencies (optional)
+# pytest>=6.0.0
+# black>=21.0.0
+# flake8>=3.9.0
+
+
+
