@@ -3,6 +3,42 @@ Example usage of the Deception Circuits Research Infrastructure.
 
 This script demonstrates how to use the framework for discovering
 and analyzing deception circuits in LLM reasoning traces.
+
+=== FOR FIRST-TIME READERS ===
+
+This is your COMPLETE GUIDE to using the deception circuits framework!
+This script shows you exactly how to:
+
+1. **SET UP DATA**: Create sample datasets with truthful vs deceptive examples
+2. **RUN EXPERIMENTS**: Use the training pipeline to discover deception circuits
+3. **ANALYZE RESULTS**: Understand which layers and features matter most
+4. **VISUALIZE FINDINGS**: Create plots and dashboards of your results
+5. **TEST CAUSALITY**: Run causal intervention experiments
+
+=== WHAT THIS SCRIPT DOES ===
+
+- Creates realistic sample data for different deception scenarios (poker, sandbagging, roleplay)
+- Runs the complete deception circuit discovery pipeline
+- Analyzes results to find the best layers for deception detection
+- Creates visualizations showing your findings
+- Demonstrates causal testing with activation patching
+
+=== HOW TO USE THIS SCRIPT ===
+
+1. **Run the full experiment**:
+   ```bash
+   python example_usage.py
+   ```
+
+2. **Run just the quick demo**:
+   ```python
+   from example_usage import quick_demo
+   quick_demo()
+   ```
+
+3. **Use as a template**: Copy the functions to create your own experiments
+
+This script is your roadmap to deception circuit research!
 """
 
 import torch

@@ -22,6 +22,45 @@ Where:
 - response: The model's response
 - label: 0 for truthful, 1 for deceptive
 - scenario: Type of deception (poker, roleplay, sandbagging, etc.)
+
+=== FOR FIRST-TIME READERS ===
+
+This module is your "data gateway" - it loads all the data you need for deception circuit research.
+Think of it as your research assistant that:
+
+1. **LOADS YOUR DATASETS**: Reads CSV files with truthful vs deceptive examples
+2. **HANDLES ACTIVATIONS**: Loads the neural network's internal states (activations)
+3. **PREPARES DATA**: Splits data into training/test sets properly
+4. **VALIDATES DATA**: Checks that your data is in the right format
+5. **PROVIDES STATS**: Tells you about your dataset (how many examples, etc.)
+
+=== WHAT DATA DO YOU NEED? ===
+
+For deception circuit research, you need TWO types of data:
+
+1. **TEXT DATA (CSV files)**: 
+   - Pairs of truthful vs deceptive responses to the same questions
+   - Examples: "2+2=4" (truthful) vs "2+2=I don't know" (deceptive)
+   
+2. **ACTIVATION DATA (PyTorch tensors)**:
+   - The neural network's internal states when generating each response
+   - These are the "brain states" we analyze to find deception circuits
+
+=== HOW TO USE ===
+
+# Load your data:
+loader = DeceptionDataLoader(device="cpu")
+
+# Load CSV with text data:
+csv_data = loader.load_csv("my_deception_data.csv")
+
+# Load corresponding activations:
+activations = loader.load_activations("activations/", csv_data['dataframe'])
+
+# Split into train/test:
+train_data, test_data = loader.split_data(csv_data['dataframe'])
+
+This prepares everything you need for training probes and autoencoders!
 """
 
 import pandas as pd

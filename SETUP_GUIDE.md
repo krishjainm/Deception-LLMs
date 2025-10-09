@@ -171,23 +171,10 @@ If you use this framework in your research, please cite:
 @misc{deception_circuits_2024,
   title={Deception Circuits Research Infrastructure},
   author={Krish Jain},
-  year={2024},
+  year={2025},
   url={https://github.com/krishjainm/Deception-LLMs}
 }
 ```
 
-## 🤝 Contributing
 
-This framework is designed to be extensible. Feel free to:
-- Add new deception scenarios
-- Implement additional analysis methods
-- Extend causal testing capabilities
-- Improve visualization tools
 
-## 📞 Support
-
-For questions or issues, please open an issue on the GitHub repository or contact the maintainer.
-
----
-
-**Happy researching! 🧠✨**

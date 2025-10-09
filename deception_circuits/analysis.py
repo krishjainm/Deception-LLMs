@@ -22,6 +22,29 @@ The visualizer creates:
 
 These tools are essential for interpreting the results and identifying
 the most promising circuits for causal intervention.
+
+=== FOR FIRST-TIME READERS ===
+
+This module is the "analysis brain" of the deception circuits research framework.
+After running experiments (training probes and autoencoders), you use these tools to:
+
+1. UNDERSTAND WHAT HAPPENED:
+   - Which layers of the neural network show deception signals?
+   - Are there specific neurons that always activate during deception?
+   - How well do our detection methods work?
+
+2. FIND PATTERNS:
+   - Do deception circuits work the same way across different scenarios?
+   - Which features are most important for detecting lies vs truth?
+   - How do different models compare?
+
+3. PREPARE FOR CAUSAL TESTING:
+   - Identify the best layers to patch/manipulate
+   - Find specific neurons to target with interventions
+   - Understand which circuits are most promising
+
+Think of this as your "detective toolkit" - it helps you analyze the evidence
+collected from your experiments and figure out where the deception circuits are hiding!
 """
 
 import torch
@@ -43,74 +66,147 @@ class CircuitAnalyzer:
     """
     Comprehensive analyzer for deception circuit results.
     
-    Provides methods for analyzing probe performance, autoencoder features,
-    and cross-scenario generalization.
+    This is the main class for analyzing your deception circuit experiments.
+    It takes the raw results from your experiments and helps you understand:
+    
+    1. **Which layers work best**: Where in the neural network can we best detect deception?
+    2. **What features matter**: Which specific neurons or patterns are important?
+    3. **Does it generalize**: Do circuits found in one scenario work in others?
+    4. **What should we patch**: Which layers/neurons should we target for causal testing?
+    
+    === HOW TO USE ===
+    
+    # After running your experiment:
+    analyzer = CircuitAnalyzer(results)
+    
+    # Find the best layers for deception detection:
+    probe_analysis = analyzer.analyze_probe_performance()
+    best_layer = probe_analysis['best_layer']
+    
+    # See which autoencoder features are important:
+    autoencoder_analysis = analyzer.analyze_autoencoder_features()
+    
+    # Check if circuits generalize across scenarios:
+    generalization = analyzer.analyze_cross_scenario_generalization()
+    
+    # Get recommendations for causal testing:
+    circuits = analyzer.identify_deception_circuits()
+    
+    === WHAT THE RESULTS MEAN ===
+    
+    - **High AUC/Accuracy**: This layer/feature can reliably detect deception
+    - **Low AUC/Accuracy**: This layer/feature doesn't help much
+    - **Cross-scenario success**: The circuit works across different types of lies
+    - **Cross-scenario failure**: Each scenario uses different circuits
+    
+    Args:
+        results: Dictionary containing experiment results from DeceptionTrainingPipeline
     """
     
     def __init__(self, results: Optional[Dict] = None):
         """
-        Initialize analyzer.
+        Initialize the circuit analyzer.
+        
+        The analyzer stores your experiment results so you can analyze them.
+        You can also pass results to individual analysis methods if you prefer.
         
         Args:
-            results: Experiment results dictionary
+            results: Experiment results dictionary from DeceptionTrainingPipeline.run_full_experiment()
+                    Contains: probe_results, autoencoder_results, cross_scenario_results, etc.
         """
         self.results = results
         
     def analyze_probe_performance(self, results: Optional[Dict] = None) -> Dict:
         """
-        Analyze linear probe performance across layers.
+        Analyze linear probe performance across layers to find where deception signals are strongest.
+        
+        This is one of the most important analyses! It tells you:
+        - Which layers of the neural network are best at detecting deception
+        - How strong the deception signal is at each layer
+        - Which layer you should target for causal interventions
+        
+        === WHAT ARE LINEAR PROBES? ===
+        
+        Linear probes are simple classifiers that try to detect deception by looking at
+        the internal activations (neural network states) at each layer. Think of them
+        as "deception detectors" that scan each layer of the network.
+        
+        - **High performance** = This layer contains strong deception signals
+        - **Low performance** = This layer doesn't help detect deception
+        
+        === WHAT THE METRICS MEAN ===
+        
+        - **AUC (Area Under Curve)**: Best overall measure (0.5 = random, 1.0 = perfect)
+        - **Accuracy**: Percentage of correct predictions (0.0 = 0%, 1.0 = 100%)
+        - **Precision**: Of all "deceptive" predictions, how many were actually deceptive?
+        - **Recall**: Of all actual deceptive examples, how many did we catch?
+        - **F1**: Balanced measure of precision and recall
         
         Args:
             results: Experiment results (uses self.results if None)
             
         Returns:
-            Dictionary with probe analysis
+            Dictionary containing:
+            - layer_metrics: Performance for each layer (sorted by AUC, best first)
+            - best_layer: The layer with highest AUC
+            - worst_layer: The layer with lowest AUC  
+            - statistics: Summary statistics across all layers
+            - auc_progression: AUC values across layers (for plotting)
+            - accuracy_progression: Accuracy values across layers (for plotting)
+            
+        Example:
+            analyzer = CircuitAnalyzer(results)
+            probe_analysis = analyzer.analyze_probe_performance()
+            best_layer = probe_analysis['best_layer']['layer']  # e.g., 'layer_15'
+            best_auc = probe_analysis['best_layer']['auc']      # e.g., 0.89
         """
         if results is None:
             results = self.results
             
         if results is None or 'probe_results' not in results:
-            raise ValueError("No probe results found")
+            raise ValueError("No probe results found - make sure you've run probe training first!")
             
         probe_results = results['probe_results']
         layer_results = probe_results['layer_results']
         test_results = probe_results['test_results']
         
-        # Extract metrics for each layer
+        # Extract performance metrics for each layer
+        # We want to see how well each layer can detect deception
         layer_metrics = []
         for layer_name, layer_data in layer_results.items():
             test_metrics = test_results[layer_name]
             layer_metrics.append({
-                'layer': layer_name,
-                'layer_idx': layer_data['layer_idx'],
-                'accuracy': test_metrics['accuracy'],
-                'precision': test_metrics['precision'],
-                'recall': test_metrics['recall'],
-                'f1': test_metrics['f1'],
-                'auc': test_metrics['auc']
+                'layer': layer_name,           # e.g., 'layer_15'
+                'layer_idx': layer_data['layer_idx'],  # e.g., 15
+                'accuracy': test_metrics['accuracy'],   # Overall correctness
+                'precision': test_metrics['precision'], # Precision of deception detection
+                'recall': test_metrics['recall'],       # Recall of deception detection  
+                'f1': test_metrics['f1'],               # Balanced precision/recall
+                'auc': test_metrics['auc']              # Best overall measure
             })
             
-        # Sort by AUC
+        # Sort layers by AUC (Area Under Curve) - best performers first
+        # AUC is the gold standard for binary classification
         layer_metrics.sort(key=lambda x: x['auc'], reverse=True)
         
-        # Calculate statistics
+        # Calculate summary statistics across all layers
         aucs = [lm['auc'] for lm in layer_metrics]
         accuracies = [lm['accuracy'] for lm in layer_metrics]
         
         analysis = {
-            'layer_metrics': layer_metrics,
-            'best_layer': layer_metrics[0],
-            'worst_layer': layer_metrics[-1],
-            'statistics': {
-                'mean_auc': np.mean(aucs),
-                'std_auc': np.std(aucs),
-                'max_auc': np.max(aucs),
-                'min_auc': np.min(aucs),
-                'mean_accuracy': np.mean(accuracies),
-                'std_accuracy': np.std(accuracies)
+            'layer_metrics': layer_metrics,    # All layers, sorted by performance
+            'best_layer': layer_metrics[0],    # Highest performing layer
+            'worst_layer': layer_metrics[-1],  # Lowest performing layer
+            'statistics': {                    # Summary stats across all layers
+                'mean_auc': np.mean(aucs),         # Average AUC across layers
+                'std_auc': np.std(aucs),           # Standard deviation of AUC
+                'max_auc': np.max(aucs),           # Best AUC found
+                'min_auc': np.min(aucs),           # Worst AUC found
+                'mean_accuracy': np.mean(accuracies), # Average accuracy
+                'std_accuracy': np.std(accuracies)    # Standard deviation of accuracy
             },
-            'auc_progression': aucs,
-            'accuracy_progression': accuracies
+            'auc_progression': aucs,           # For plotting AUC across layers
+            'accuracy_progression': accuracies # For plotting accuracy across layers
         }
         
         return analysis
@@ -324,16 +420,56 @@ class VisualizationTools:
     """
     Visualization tools for deception circuit research.
     
-    Creates plots and interactive visualizations for results analysis.
+    This class creates all the plots and visualizations you need to understand
+    your deception circuit experiments. It's like your "visual detective toolkit"!
+    
+    === WHAT VISUALIZATIONS ARE AVAILABLE ===
+    
+    1. **Layer Performance Plots**: Shows which layers are best at detecting deception
+    2. **Feature Importance Charts**: Shows which specific neurons/features matter most
+    3. **Generalization Matrices**: Shows if circuits work across different scenarios
+    4. **Activation Visualizations**: 2D plots of neural network states (t-SNE, PCA)
+    5. **Interactive Dashboards**: Comprehensive plots with hover information
+    
+    === HOW TO USE ===
+    
+    # Create visualization tools:
+    viz = VisualizationTools()
+    
+    # Plot layer performance:
+    fig = viz.plot_layer_performance(results)
+    
+    # Show feature importance:
+    fig = viz.plot_feature_importance(results)
+    
+    # Create interactive dashboard:
+    fig = viz.create_interactive_dashboard(results)
+    
+    === WHY VISUALIZATION MATTERS ===
+    
+    - **Layer plots**: Help you find the best layers for causal interventions
+    - **Feature plots**: Show which neurons to target with patching
+    - **Generalization plots**: Reveal if circuits are universal or scenario-specific
+    - **Activation plots**: Help you understand what the neural network is "thinking"
+    
+    These plots are essential for:
+    1. Understanding your results
+    2. Finding patterns in the data
+    3. Preparing presentations/papers
+    4. Identifying the best targets for causal testing
     """
     
     def __init__(self, style: str = "default", figsize: Tuple[int, int] = (12, 8)):
         """
-        Initialize visualization tools.
+        Initialize visualization tools with your preferred style.
         
         Args:
-            style: Matplotlib style (default, ggplot, classic, etc.)
-            figsize: Default figure size
+            style: Matplotlib plotting style
+                  - "default": Clean, professional style
+                  - "ggplot": R-like style with gray backgrounds
+                  - "seaborn": Statistical plotting style
+                  - "classic": Old matplotlib style
+            figsize: Default size for plots (width, height) in inches
         """
         self.style = style
         self.figsize = figsize
@@ -346,55 +482,104 @@ class VisualizationTools:
     def plot_layer_performance(self, results: Dict, 
                              save_path: Optional[Union[str, Path]] = None) -> plt.Figure:
         """
-        Plot performance across layers.
+        Create a crucial plot showing deception detection performance across all neural network layers.
+        
+        This is one of the MOST IMPORTANT plots for your research! It shows you:
+        - Where in the neural network deception signals are strongest
+        - Which layers you should target for causal interventions
+        - How deception detection improves/worsens as information flows through the network
+        
+        === WHAT THIS PLOT TELLS YOU ===
+        
+        **Top Plot (AUC)**: 
+        - Shows Area Under Curve (AUC) for each layer
+        - AUC = 0.5 means random guessing (no signal)
+        - AUC = 1.0 means perfect deception detection
+        - **Higher AUC = Stronger deception signal in that layer**
+        
+        **Bottom Plot (Accuracy)**:
+        - Shows classification accuracy for each layer  
+        - Accuracy = 0.0 means 0% correct, 1.0 means 100% correct
+        - **Higher accuracy = Better deception detection in that layer**
+        
+        **Red dots**: Highlight the best performing layer for each metric
+        
+        === HOW TO INTERPRET RESULTS ===
+        
+        - **Rising curve**: Deception signals get stronger in later layers (common)
+        - **Peak in middle**: Deception signals peak in middle layers then fade
+        - **Flat line**: All layers perform similarly (deception is distributed)
+        - **Noisy curve**: Performance varies a lot between layers
+        
+        === WHAT TO DO NEXT ===
+        
+        - **Target the best layers** for activation patching experiments
+        - **Focus on layers with AUC > 0.7** for strong deception signals
+        - **Avoid layers with AUC < 0.6** - too weak for reliable interventions
         
         Args:
-            results: Experiment results
-            save_path: Path to save plot
+            results: Experiment results from DeceptionTrainingPipeline.run_full_experiment()
+            save_path: Optional path to save the plot (e.g., 'layer_performance.png')
             
         Returns:
-            Matplotlib figure
+            Matplotlib figure object that you can display or save
+            
+        Example:
+            viz = VisualizationTools()
+            fig = viz.plot_layer_performance(results)
+            plt.show()  # Display the plot
+            
+            # Or save it:
+            fig = viz.plot_layer_performance(results, save_path='results/layer_performance.png')
         """
+        # Get probe analysis results - this contains the performance metrics
         if 'analysis_results' not in results:
+            # If we don't have analysis results yet, create them
             analyzer = CircuitAnalyzer(results)
             probe_analysis = analyzer.analyze_probe_performance()
         else:
             probe_analysis = results['analysis_results']
             
-        # Extract data
-        layers = [lm['layer_idx'] for lm in probe_analysis['layer_metrics']]
-        aucs = [lm['auc'] for lm in probe_analysis['layer_metrics']]
-        accuracies = [lm['accuracy'] for lm in probe_analysis['layer_metrics']]
+        # Extract the data we need for plotting
+        layers = [lm['layer_idx'] for lm in probe_analysis['layer_metrics']]  # Layer indices (0, 1, 2, ...)
+        aucs = [lm['auc'] for lm in probe_analysis['layer_metrics']]         # AUC scores for each layer
+        accuracies = [lm['accuracy'] for lm in probe_analysis['layer_metrics']] # Accuracy for each layer
         
-        # Create subplots
+        # Create two subplots - one for AUC, one for Accuracy
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=self.figsize, sharex=True)
         
-        # Plot AUC
-        ax1.plot(layers, aucs, 'b-o', linewidth=2, markersize=6)
+        # === TOP PLOT: AUC SCORES ===
+        # AUC is the gold standard metric - shows how well each layer can distinguish deception
+        ax1.plot(layers, aucs, 'b-o', linewidth=2, markersize=6, label='AUC Score')
         ax1.set_ylabel('AUC Score')
-        ax1.set_title('Deception Detection Performance Across Layers')
-        ax1.grid(True, alpha=0.3)
-        ax1.set_ylim(0, 1)
+        ax1.set_title('Deception Detection Performance Across Layers\n(Top: AUC, Bottom: Accuracy)')
+        ax1.grid(True, alpha=0.3)  # Add subtle grid for easier reading
+        ax1.set_ylim(0, 1)  # AUC ranges from 0 to 1
         
-        # Highlight best layer
+        # Highlight the best performing layer with a red dot
         best_idx = aucs.index(max(aucs))
-        ax1.plot(layers[best_idx], aucs[best_idx], 'ro', markersize=10, label=f'Best: {max(aucs):.3f}')
+        ax1.plot(layers[best_idx], aucs[best_idx], 'ro', markersize=10, 
+                label=f'Best: {max(aucs):.3f}')
         ax1.legend()
         
-        # Plot Accuracy
-        ax2.plot(layers, accuracies, 'g-o', linewidth=2, markersize=6)
-        ax2.set_xlabel('Layer Index')
+        # === BOTTOM PLOT: ACCURACY ===
+        # Accuracy shows the percentage of correct predictions
+        ax2.plot(layers, accuracies, 'g-o', linewidth=2, markersize=6, label='Accuracy')
+        ax2.set_xlabel('Layer Index')  # Which layer of the neural network
         ax2.set_ylabel('Accuracy')
         ax2.grid(True, alpha=0.3)
-        ax2.set_ylim(0, 1)
+        ax2.set_ylim(0, 1)  # Accuracy ranges from 0 to 1
         
-        # Highlight best layer
+        # Highlight the best performing layer for accuracy
         best_acc_idx = accuracies.index(max(accuracies))
-        ax2.plot(layers[best_acc_idx], accuracies[best_acc_idx], 'ro', markersize=10, label=f'Best: {max(accuracies):.3f}')
+        ax2.plot(layers[best_acc_idx], accuracies[best_acc_idx], 'ro', markersize=10, 
+                label=f'Best: {max(accuracies):.3f}')
         ax2.legend()
         
+        # Make the plot look nice
         plt.tight_layout()
         
+        # Save the plot if requested
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
             

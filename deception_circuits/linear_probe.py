@@ -17,6 +17,53 @@ Linear probes are a key tool in mechanistic interpretability because they:
 - Can be applied to any layer of the model
 
 Based on the LLMProbe architecture, adapted specifically for deception research.
+
+=== FOR FIRST-TIME READERS ===
+
+This module implements "deception detectors" - simple AI models that scan the neural network's
+internal states to find deception signals. Think of them as lie detectors for AI!
+
+=== WHAT ARE LINEAR PROBES? ===
+
+Linear probes are simple classifiers that try to detect deception by looking at the neural
+network's internal activations (its "brain states"). They work like this:
+
+1. **INPUT**: Activations from a specific layer of the neural network
+2. **PROCESSING**: Simple linear transformation (like a weighted sum)
+3. **OUTPUT**: Probability that the response is deceptive (0-1)
+
+The key insight: If deception is encoded in the neural network's activations, a simple
+linear classifier should be able to detect it.
+
+=== WHY LINEAR PROBES MATTER ===
+
+- **SIMPLE BUT POWERFUL**: If a simple linear classifier can detect deception, 
+  then deception signals are clearly encoded in the activations
+- **FAST TO TRAIN**: Can train hundreds of probes quickly
+- **INTERPRETABLE**: The weights tell you which neurons matter most
+- **LAYER-BY-LAYER**: Test every layer to find where deception signals emerge
+
+=== HOW IT WORKS IN PRACTICE ===
+
+1. **Train probes on each layer**: See which layers can best detect deception
+2. **Find the best layer**: Layer with highest accuracy/AUC
+3. **Analyze weights**: See which specific neurons are most important
+4. **Target for causal testing**: Use the best layer for activation patching
+
+=== EXAMPLE USAGE ===
+
+# Create a probe for a specific layer:
+probe = DeceptionLinearProbe(input_dim=768)
+
+# Train it to detect deception:
+trainer = LinearProbeTrainer(device="cpu")
+results = trainer.train_probe(probe, activations, labels)
+
+# Check how well it works:
+accuracy = results['final_metrics']['accuracy']
+print(f"Probe accuracy: {accuracy:.3f}")
+
+This is the foundation of deception circuit discovery!
 """
 
 import torch

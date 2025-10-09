@@ -19,6 +19,64 @@ The DeceptionTrainingPipeline class provides a high-level interface that:
 
 This implements the core methodology from the BLKY project for discovering
 and analyzing deception circuits in LLM reasoning traces.
+
+=== FOR FIRST-TIME READERS ===
+
+This is the "MAIN CONTROL CENTER" of your deception circuit research! The DeceptionTrainingPipeline
+is like your research assistant that runs the entire experiment for you.
+
+=== WHAT THIS PIPELINE DOES ===
+
+Think of it as an automated research workflow that:
+
+1. **LOADS YOUR DATA**: Reads CSV files with truthful vs deceptive examples
+2. **TRAINS DETECTORS**: Creates "deception detectors" (linear probes) for each layer
+3. **FINDS FEATURES**: Discovers important features using sparse autoencoders
+4. **TESTS GENERALIZATION**: Checks if circuits work across different scenarios
+5. **SAVES EVERYTHING**: Stores all results, models, and plots
+
+=== THE COMPLETE RESEARCH WORKFLOW ===
+
+```
+Input: CSV file with deceptive vs truthful examples
+  ↓
+Step 1: Load and validate data
+  ↓
+Step 2: Train linear probes on each layer
+  ↓
+Step 3: Train sparse autoencoders on each layer
+  ↓
+Step 4: Test cross-scenario generalization
+  ↓
+Step 5: Analyze results and identify circuits
+  ↓
+Output: Complete analysis of deception circuits
+```
+
+=== HOW TO USE (SIMPLE) ===
+
+```python
+# Create the pipeline:
+pipeline = DeceptionTrainingPipeline(device="cpu", output_dir="my_results")
+
+# Run the complete experiment:
+results = pipeline.run_full_experiment("my_data.csv")
+
+# That's it! Everything is automated.
+print(f"Best layer: {results['analysis_results']['best_probe_layer']}")
+```
+
+=== WHAT YOU GET ===
+
+After running the pipeline, you'll have:
+- **Best performing layers** for deception detection
+- **Feature importance** showing which neurons matter
+- **Generalization results** across different scenarios
+- **Trained models** ready for causal testing
+- **Visualizations** showing your results
+- **Complete analysis** of deception circuits
+
+This is the heart of the BLKY research methodology!
 """
 
 import torch
