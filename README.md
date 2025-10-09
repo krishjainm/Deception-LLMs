@@ -206,10 +206,10 @@ This infrastructure builds upon the [LLMProbe](https://github.com/jammastergiris
 If you use this infrastructure in your research, please cite:
 
 ```bibtex
-@misc{deception_circuits_2024,
+@misc{deception_circuits_2025,
   title={Deception Circuits Research Infrastructure},
   author={Krish Jain},
-  year={2024},
+  year={2025},
   url={https://github.com/krishjainm/Deception-LLMs}
 }
 ```
