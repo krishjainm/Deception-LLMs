@@ -168,7 +168,7 @@ fig.savefig("layer_performance.png")
 If you use this framework in your research, please cite:
 
 ```bibtex
-@misc{deception_circuits_2024,
+@misc{deception_circuits_2025,
   title={Deception Circuits Research Infrastructure},
   author={Krish Jain},
   year={2025},
