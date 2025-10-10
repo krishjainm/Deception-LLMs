@@ -12,13 +12,19 @@ plotly>=5.0.0
 # Data processing
 scipy>=1.7.0
 
+# Model integration (for real LLM support)
+openai>=1.0.0
+transformers>=4.20.0
+datasets>=2.0.0
+
+# Production features
+pyyaml>=6.0
+psutil>=5.8.0
+networkx>=2.6.0
+
 # Optional: For advanced visualization
 # jupyter>=1.0.0
 # ipywidgets>=7.6.0
-
-# Optional: For model loading (if using HuggingFace models)
-# transformers>=4.20.0
-# datasets>=2.0.0
 
 # Development dependencies (optional)
 # pytest>=6.0.0

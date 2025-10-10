@@ -89,8 +89,32 @@ from .activation_patching import ActivationPatcher, CausalTester
 from .analysis import CircuitAnalyzer, VisualizationTools
 from .training_pipeline import DeceptionTrainingPipeline
 
+# Import new production-ready modules
+from .model_integration import (
+    GPT4oIntegration, ActivationExtractor, ModelIntegrationPipeline,
+    create_gpt4o_deception_dataset
+)
+from .advanced_causal_testing import (
+    AttentionPatcher as AdvancedAttentionPatcher, 
+    SteeringVectorLearner, GradientBasedInterventions,
+    MultiLayerIntervention, AdvancedCausalTester,
+    run_advanced_deception_analysis
+)
+from .interpretability import (
+    AttentionVisualizer, FeatureAttributor, NeuronAnalyzer,
+    CircuitVisualizer, InterpretabilitySuite,
+    run_comprehensive_interpretability_analysis
+)
+from .production import (
+    ConfigManager, ProductionLogger, PerformanceMonitor,
+    ErrorHandler, CheckpointManager, ProductionPipeline,
+    production_ready, create_production_config,
+    create_dockerfile, create_docker_compose
+)
+
 # Define what gets imported when someone does "from deception_circuits import *"
 __all__ = [
+    # Core Framework
     "DeceptionDataLoader",      # Loads CSV data with activation support
     "DeceptionLinearProbe",     # Linear classifier for deception detection
     "LinearProbeTrainer",       # Trains probes across multiple layers
@@ -100,5 +124,39 @@ __all__ = [
     "CausalTester",             # Comprehensive causal testing framework
     "CircuitAnalyzer",          # Analyzes results and identifies circuits
     "VisualizationTools",       # Creates plots and dashboards
-    "DeceptionTrainingPipeline" # Main orchestration class
+    "DeceptionTrainingPipeline", # Main orchestration class
+    
+    # Real Model Integration
+    "GPT4oIntegration",         # GPT-4o integration for data generation
+    "ActivationExtractor",      # Extract activations from transformer models
+    "ModelIntegrationPipeline", # Complete pipeline for real model integration
+    "create_gpt4o_deception_dataset", # Create datasets with GPT-4o
+    
+    # Advanced Causal Testing
+    "AdvancedAttentionPatcher", # Advanced attention patching
+    "SteeringVectorLearner",    # Learn steering vectors for behavior control
+    "GradientBasedInterventions", # Gradient-based causal interventions
+    "MultiLayerIntervention",   # Multi-layer coordinated interventions
+    "AdvancedCausalTester",     # Advanced causal testing framework
+    "run_advanced_deception_analysis", # Run advanced causal analysis
+    
+    # Interpretability
+    "AttentionVisualizer",      # Visualize attention patterns
+    "FeatureAttributor",        # Feature attribution analysis
+    "NeuronAnalyzer",           # Individual neuron analysis
+    "CircuitVisualizer",        # Circuit flow visualization
+    "InterpretabilitySuite",    # Comprehensive interpretability tools
+    "run_comprehensive_interpretability_analysis", # Run interpretability analysis
+    
+    # Production Features
+    "ConfigManager",            # Configuration management
+    "ProductionLogger",         # Production logging system
+    "PerformanceMonitor",       # Performance monitoring
+    "ErrorHandler",             # Error handling and recovery
+    "CheckpointManager",        # Checkpoint management
+    "ProductionPipeline",       # Production-ready pipeline
+    "production_ready",         # Decorator for production functions
+    "create_production_config", # Create production configuration
+    "create_dockerfile",        # Create Dockerfile
+    "create_docker_compose",    # Create Docker Compose file
 ]
